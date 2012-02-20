@@ -1,4 +1,3 @@
-#include <sstream>
 #include <pthread.h>
 #include <msgpack.h>
 #include <msgpack/rpc/server.h>
