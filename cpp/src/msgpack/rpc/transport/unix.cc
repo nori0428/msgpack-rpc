@@ -51,6 +51,7 @@ public:
 
 	void on_response(msgid_t msgid,
 			object result, object error, auto_zone z);
+	void on_closed() {}
 
 private:
 	weak_session m_session;
@@ -148,6 +149,7 @@ public:
 
 	void on_notify(
 			object method, object params, auto_zone z);
+	void on_closed() {}
 
 private:
 	weak_server m_svr;

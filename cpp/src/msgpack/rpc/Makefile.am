@@ -41,6 +41,7 @@ nobase_libmsgpack_rpc_include_HEADERS = \
 		transport/tcp.h \
 		transport/udp.h \
 		transport/unix.h \
+		message_sendable.h \
 		version.h
 
 noinst_HEADERS = \
@@ -51,7 +52,6 @@ noinst_HEADERS = \
 		session_impl.h \
 		session_pool_impl.h \
 		reqtable.h \
-		message_sendable.h \
 		transport_impl.h \
 		transport/base.h
 

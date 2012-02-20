@@ -45,9 +45,21 @@ public:
 	void on_notify(
 			object method, object params, auto_zone z);
 
+	void on_accept(shared_message_sendable ms);
+	void on_closed(shared_message_sendable ms);
+	void send_broadcast(sbuffer* sbuf);
+	void send_notify(shared_message_sendable ms, sbuffer* sbuf);
+
 private:
 	dispatcher* m_dp;
 	std::auto_ptr<server_transport> m_stran;
+
+	typedef std::list<shared_message_sendable> mspool_t;
+	struct sync_t {
+		mspool_t mspool;
+	};
+	typedef mp::sync<sync_t>::ref sync_ref;
+	mp::sync<sync_t> m_sync;
 
 private:
 	server_impl();

@@ -31,6 +31,11 @@ object request::params()
 	return m_pimpl->params();
 }
 
+shared_message_sendable request::get_client()
+{
+	return m_pimpl->get_client();
+}
+
 bool request::is_sent() const
 {
 	return m_pimpl->is_sent();

@@ -345,6 +345,7 @@ try {
 	e.remove();
 	return;
 } catch(closed_exception& ex) {
+	static_cast<MixIn*>(this)->on_closed();
 	e.remove();
 	return;
 } catch(std::exception& ex) {

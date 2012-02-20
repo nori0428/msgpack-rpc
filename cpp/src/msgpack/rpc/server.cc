@@ -69,6 +69,45 @@ void server_impl::on_notify(
 	m_dp->dispatch(request(sr));
 }
 
+void server_impl::on_accept(shared_message_sendable ms)
+{
+	sync_ref ref(m_sync);
+	ref->mspool.push_back(ms);
+}
+
+void server_impl::on_closed(shared_message_sendable ms)
+{
+	m_dp->on_closed(ms);
+
+	sync_ref ref(m_sync);
+	ref->mspool.remove(ms);
+}
+
+void server_impl::send_broadcast(sbuffer* sbuf)
+{
+	sync_ref ref(m_sync);
+	std::list<shared_message_sendable>::iterator it = ref->mspool.begin();
+
+	while (it != ref->mspool.end()) {
+		sbuffer clone;
+		clone.write(sbuf->data(), sbuf->size());
+		(*it)->send_data(&clone);
+		++it;
+	}
+}
+
+void server_impl::send_notify(shared_message_sendable ms, sbuffer* sbuf)
+{
+	sync_ref ref(m_sync);
+	sbuffer clone;
+	clone.write(sbuf->data(), sbuf->size());
+
+	std::list<shared_message_sendable>::iterator it;
+	it = find(ref->mspool.begin(), ref->mspool.end(), ms);
+	if (it != ref->mspool.end()) {
+		(*it)->send_data(&clone);
+	}
+}
 
 server::server(loop lo) :
 	session_pool(shared_session_pool(new server_impl(tcp_builder(), lo))) { }
@@ -95,6 +134,15 @@ void server::listen(const address& addr)
 void server::listen(const std::string& host, uint16_t port)
 	{ listen(ip_address(host, port)); }
 
+void server::send_broadcast_impl(sbuffer* sbuf)
+{
+	static_cast<server_impl*>(m_pimpl.get())->send_broadcast(sbuf);
+}
+
+void server::send_notify_impl(shared_message_sendable ms, sbuffer* sbuf)
+{
+	static_cast<server_impl*>(m_pimpl.get())->send_notify(ms, sbuf);
+}
 
 }  // namespace rpc
 }  // namespace msgpack

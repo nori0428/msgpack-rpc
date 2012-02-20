@@ -50,6 +50,7 @@ public:
 
 	void on_response(msgid_t msgid,
 			object result, object error, auto_zone z);
+	void on_closed() {}
 
 private:
 	client_transport* m_tran;
@@ -298,6 +299,7 @@ public:
 
 	void on_notify(
 			object method, object params, auto_zone z);
+	void on_closed();
 
 private:
 	weak_server m_svr;
@@ -354,6 +356,14 @@ void server_socket::on_notify(
 	svr->on_notify(method, params, z);
 }
 
+void server_socket::on_closed()
+{
+	shared_server svr = m_svr.lock();
+	if(!svr) {
+		throw closed_exception();
+	}
+	svr->on_closed(get_response_sender());
+}
 
 server_transport::server_transport(server_impl* svr, const address& addr) :
 	m_lsock(-1), m_loop(svr->get_loop_ref())
@@ -387,6 +397,8 @@ void server_transport::close()
 void server_transport::on_accept(int fd, int err, weak_server wsvr)
 {
 	shared_server svr = wsvr.lock();
+	mp::shared_ptr<server_socket> ss;
+
 	if(!svr) {
 		if(fd >= 0) {
 			::close(fd);
@@ -405,11 +417,12 @@ void server_transport::on_accept(int fd, int err, weak_server wsvr)
 	::setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on));
 
 	try {
-		svr->get_loop_ref()->add_handler<server_socket>(fd, svr);
+		ss = svr->get_loop_ref()->add_handler<server_socket>(fd, svr);
 	} catch (...) {
 		::close(fd);
 		throw;
 	}
+	svr->on_accept(ss.get()->get_response_sender());
 }
 
 

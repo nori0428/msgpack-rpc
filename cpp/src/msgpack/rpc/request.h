@@ -21,6 +21,7 @@
 #include "protocol.h"
 #include "impl_fwd.h"
 #include "types.h"
+#include "message_sendable.h"
 
 namespace msgpack {
 namespace rpc {
@@ -33,6 +34,7 @@ public:
 
 	object method();
 	object params();
+	shared_message_sendable get_client();
 	auto_zone& zone();
 
 	template <typename Result>

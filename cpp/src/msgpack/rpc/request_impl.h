@@ -36,6 +36,7 @@ public:
 
 	object method() { return m_method; }
 	object params() { return m_params; }
+	shared_message_sendable get_client() { return m_ms; }
 	auto_zone& zone() { return m_zone; }
 	msgid_t get_msgid() const { return m_msgid; }
 
