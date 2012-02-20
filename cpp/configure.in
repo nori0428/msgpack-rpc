@@ -152,5 +152,6 @@ AC_OUTPUT([Makefile
 		   src/cclog/Makefile
 		   src/msgpack/rpc/Makefile
 		   src/msgpack/rpc/version.h
-		   test/Makefile])
+		   test/Makefile
+		   sample/Makefile])
 
