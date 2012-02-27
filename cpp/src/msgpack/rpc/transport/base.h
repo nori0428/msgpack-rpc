@@ -342,6 +342,7 @@ try {
 
 } catch(msgpack::type_error& ex) {
 	LOG_WARN("connection: type error");
+	static_cast<MixIn*>(this)->on_closed();
 	e.remove();
 	return;
 } catch(closed_exception& ex) {
@@ -350,10 +351,12 @@ try {
 	return;
 } catch(std::exception& ex) {
 	LOG_WARN("connection: ", ex.what());
+	static_cast<MixIn*>(this)->on_closed();
 	e.remove();
 	return;
 } catch(...) {
 	LOG_WARN("connection: unknown error");
+	static_cast<MixIn*>(this)->on_closed();
 	e.remove();
 	return;
 }
