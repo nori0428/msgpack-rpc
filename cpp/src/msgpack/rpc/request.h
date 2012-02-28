@@ -34,7 +34,7 @@ public:
 
 	object method();
 	object params();
-	shared_message_sendable get_client();
+	shared_message_sendable source();
 	auto_zone& zone();
 
 	template <typename Result>

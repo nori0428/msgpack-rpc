@@ -27,10 +27,10 @@ namespace rpc {
 
 class dispatcher {
 public:
-	typedef shared_message_sendable shared_client;
+	typedef shared_message_sendable shared_source;
 
 	virtual void dispatch(request req) = 0;
-	virtual void on_closed(shared_client sc) {}
+	virtual void on_closed(shared_source s) {}
 };
 
 

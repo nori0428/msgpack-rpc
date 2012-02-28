@@ -4,9 +4,10 @@
 
 class myserver : public msgpack::rpc::server::base {
 private:
-	pthread_t m_bthread, m_mthread;
+	pthread_t m_thread;
+	pthread_mutex_t m_mutex;
 	int m_num;
-	std::list<shared_client> m_clients;
+	std::list<shared_source> m_clients;
 
 public:
 	void add(msgpack::rpc::request req, int a1, int a2)
@@ -19,41 +20,47 @@ public:
 	}
 	void multicast(msgpack::rpc::request req, std::string str)
 	{
+		// need to lock for self list
+		pthread_mutex_lock(&m_mutex);
 		this->instance.multicast(m_clients, "multicast", str);
+		pthread_mutex_unlock(&m_mutex);
 	}
 	void join(msgpack::rpc::request req)
 	{
-		// XXX: lock
-		m_clients.push_back(req.get_client());
+		pthread_mutex_lock(&m_mutex);
+		m_clients.push_back(req.source());
+		pthread_mutex_unlock(&m_mutex);
 		req.result(true);
 	}
 	void leave(msgpack::rpc::request req)
 	{
-		// XXX: lock
-		m_clients.remove(req.get_client());
+		pthread_mutex_lock(&m_mutex);
+		m_clients.remove(req.source());
+		pthread_mutex_unlock(&m_mutex);
 		req.result(true);
 	}
-	void on_closed(shared_client sc)
+	void on_closed(shared_source s)
 	{
-		// XXX: lock
-		m_clients.remove(sc);
+		pthread_mutex_lock(&m_mutex);
+		m_clients.remove(s);
+		pthread_mutex_unlock(&m_mutex);
 	}
 
 public:
-	myserver() : m_num(0) {}
-	std::list<shared_client> get_clients()
+	myserver() : m_num(0)
 	{
-		return m_clients;
+		pthread_mutex_init(&m_mutex, NULL);
 	}
 	void start_broadcast()
 	{
-		pthread_create(&m_bthread, NULL, myserver::broadcast, this);
+		pthread_create(&m_thread, NULL, myserver::broadcast, this);
 	}
 	static void *broadcast(void* s) {
 		myserver* ss = reinterpret_cast<myserver *>(s);
 		std::string str = "string";
 
 		while (true) {
+			// no need to lock
 			ss->instance.broadcast("broadcast", str, ss->m_num);
 			ss->m_num = (ss->m_num > 1000) ? 0 : ss->m_num + 1;
 			sleep(1);
