@@ -30,6 +30,7 @@ typedef uint32_t method_t;
 typedef uint8_t message_type_t;
 typedef uint8_t error_type_t;
 
+static const message_type_t UNDEFINED = -1;
 static const message_type_t REQUEST  = 0;
 static const message_type_t RESPONSE = 1;
 static const message_type_t NOTIFY   = 2;
@@ -39,7 +40,7 @@ static const error_type_t ARGUMENT_ERROR  = 0x02;
 
 
 struct msg_rpc {
-	msg_rpc() { }
+	msg_rpc() : type(UNDEFINED) { }
 
 	message_type_t type;
 
